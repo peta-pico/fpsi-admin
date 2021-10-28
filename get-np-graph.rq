@@ -8,7 +8,9 @@ prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 
 prefix lf: <https://w3id.org/linkflows/reviews/>
 
-select distinct ?review_npLabel ?rel ?submitted_npLabel where {
+select distinct ?node1 ?rel ?node2 where {
+
+{
   graph ?submission_np_head {
     ?submission_np np:hasAssertion ?submission_np_assertion ;
       np:hasPublicationInfo ?submission_np_pubinfo ;
@@ -21,11 +23,6 @@ select distinct ?review_npLabel ?rel ?submitted_npLabel where {
   graph ?submission_np_pubinfo {
     ?submission_np dct:creator ?__author_iri .
     bind(?__author_iri as ?author)
-  }
-  optional { ?__author_iri foaf:name ?authorLabel . }
-  filter( ?authorLabel != "Cristina-Iulia Bucu"^^xsd:string )
-  graph npa:graph {
-    ?submission_np npa:hasValidSignatureForPublicKey ?pubkey .
   }
 
   filter not exists {
@@ -51,11 +48,6 @@ select distinct ?review_npLabel ?rel ?submitted_npLabel where {
     ?review_np dct:creator ?__reviewer_iri .
     bind(?__reviewer_iri as ?reviewer)
   }
-  optional { ?__reviewer_iri foaf:name ?reviewerLabel . }
-  filter( ?reviewerLabel != "Cristina-Iulia Bucu"^^xsd:string )
-  graph npa:graph {
-    ?review_np npa:hasValidSignatureForPublicKey ?reviewer_pubkey .
-  }
 
   filter not exists {
     graph npa:graph { ?newversion npa:hasValidSignatureForPublicKey ?reviewer_pubkey . } ?newversion np:hasPublicationInfo ?ri .  # TODO: move into npa:graph
@@ -67,5 +59,38 @@ select distinct ?review_npLabel ?rel ?submitted_npLabel where {
   }
 
   bind("->" as ?rel)
+  bind(?review_npLabel as ?node1)
+  bind(?submitted_npLabel as ?node2)
+  
+} union {
+
+  graph ?submission_np_head {
+    ?submission_np np:hasAssertion ?submission_np_assertion ;
+      np:hasPublicationInfo ?submission_np_pubinfo ;
+      a np:Nanopublication .
+  }
+  graph ?submission_np_assertion {
+    ?submitted_np frbr:partOf <https://w3id.org/linkflows/formalization-papers/DataScienceSpecialIssue> .
+    bind(replace(str(?submitted_np), '^.*(RA[a-zA-Z0-9-_]{8})[a-zA-Z0-9-_]{35}$', '$1') as ?submitted_npLabel)
+  }
+  graph ?submission_np_pubinfo {
+    ?submission_np dct:creator ?__author_iri .
+    bind(?__author_iri as ?author)
+  }
+
+  filter not exists {
+    graph npa:graph { ?newversion npa:hasValidSignatureForPublicKey ?pubkey . } ?newversion np:hasPublicationInfo ?si .  # TODO: move into npa:graph
+    graph ?si { ?newversion npx:supersedes ?submission_np . }
+  }
+  filter not exists {
+    graph npa:graph { ?retraction_s npa:hasValidSignatureForPublicKey ?pubkey . } ?retraction_s np:hasAssertion ?sa .  # TODO: move into npa:graph
+    graph ?sa { ?somebody_s npx:retracts ?submission_np . }
+  }
+
+  bind("[fillcolor=red]" as ?rel)
+  bind(?submitted_npLabel as ?node1)
+  bind("" as ?node2)
+
+}
 
 }
