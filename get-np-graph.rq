@@ -1,0 +1,115 @@
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix dct: <http://purl.org/dc/terms/>
+prefix np: <http://www.nanopub.org/nschema#>
+prefix npx: <http://purl.org/nanopub/x/>
+prefix npa: <http://purl.org/nanopub/admin/>
+prefix frbr: <http://purl.org/vocab/frbr/core#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+prefix Syntax: <https://w3id.org/linkflows/reviews/SyntaxComment>
+prefix Style: <https://w3id.org/linkflows/reviews/StyleComment>
+prefix Content: <https://w3id.org/linkflows/reviews/ContentComment>
+
+prefix Negative: <https://w3id.org/linkflows/reviews/NegativeComment>
+prefix Neutral: <https://w3id.org/linkflows/reviews/NeutralComment>
+prefix Positive: <https://w3id.org/linkflows/reviews/PositiveComment>
+
+prefix NoActionNeeded: <https://w3id.org/linkflows/reviews/NoActionNeededComment>
+prefix Suggestion: <https://w3id.org/linkflows/reviews/SuggestionComment>
+prefix ActionNeeded: <https://w3id.org/linkflows/reviews/ActionNeededComment>
+
+prefix lf: <https://w3id.org/linkflows/reviews/>
+
+prefix respond: <http://localhost:37373/publish?template=http://purl.org/np/RAe785M0p3cxpVXp2dhVdspVyj3YMdDdb0JEQdKPjO96E&param_OtherComment=>
+
+select distinct ?submitted_np ?submitted_npLabel ?author ?authorLabel ?review_np ?review_npLabel ?reviewer ?reviewerLabel ?aspect ?positivity ?action ?impact ?mentioning ?mentioningLabel ?text ?response_np ?response_npLabel ?add_response ?add_responseLabel where {
+  graph ?submission_np_head {
+    ?submission_np np:hasAssertion ?submission_np_assertion ;
+      np:hasPublicationInfo ?submission_np_pubinfo ;
+      a np:Nanopublication .
+  }
+  graph ?submission_np_assertion {
+    ?submitted_np frbr:partOf <https://w3id.org/linkflows/formalization-papers/DataScienceSpecialIssue> .
+    bind(replace(str(?submitted_np), '^.*(RA[a-zA-Z0-9-_]{8})[a-zA-Z0-9-_]{35}$', '$1') as ?submitted_npLabel)
+  }
+  graph ?submission_np_pubinfo {
+    ?submission_np dct:creator ?__author_iri .
+    bind(?__author_iri as ?author)
+  }
+  optional { ?__author_iri foaf:name ?authorLabel . }
+  filter( ?authorLabel != "Cristina-Iulia Bucu"^^xsd:string )
+  graph npa:graph {
+    ?submission_np npa:hasValidSignatureForPublicKey ?pubkey .
+  }
+
+  filter not exists {
+    graph npa:graph { ?newversion npa:hasValidSignatureForPublicKey ?pubkey . } ?newversion np:hasPublicationInfo ?si .  # TODO: move into npa:graph
+    graph ?si { ?newversion npx:supersedes ?submission_np . }
+  }
+  filter not exists {
+    graph npa:graph { ?retraction npa:hasValidSignatureForPublicKey ?pubkey . } ?retraction np:hasAssertion ?sa .  # TODO: move into npa:graph
+    graph ?sa { ?somebody npx:retracts ?submission_np . }
+  }
+
+  graph ?review_np_head {
+    ?review_np np:hasAssertion ?review_np_assertion ;
+      np:hasPublicationInfo ?review_np_pubinfo ;
+      a np:Nanopublication .
+    bind(replace(str(?review_np), '^.*(RA[a-zA-Z0-9-_]{8})[a-zA-Z0-9-_]{35}$', '$1') as ?review_npLabel)
+  }
+  graph ?review_np_assertion {
+    ?r a lf:ReviewComment .
+    ?r lf:refersTo ?submitted_np .
+    optional {
+      ?r lf:refersToMentioningOf ?mentioning .
+      bind(replace(replace(str(?mentioning), '^.*[/#]([^/#]+)[/#]?$', '$1'), '^(RA[a-zA-Z0-9-_]{8})[a-zA-Z0-9-_]{35}$', '$1') as ?mentioningLabel)
+    }
+    ?r a ?aspect .
+    values ?aspect { lf:ContentComment lf:StyleComment lf:SyntaxComment }
+    ?r a ?positivity .
+    values ?positivity { lf:PositiveComment lf:NeutralComment lf:NegativeComment }
+    ?r a ?action .
+    values ?action { lf:ActionNeededComment lf:NoActionNeededComment lf:SuggestionComment }
+    ?r lf:hasImpact ?impact .
+    ?r lf:hasCommentText ?textpre .
+    bind(strdt(replace(?textpre, "[^\n\t\r -􏿿]", "[NON-PRINTABLE-CHARACTER]"), xsd:string) as ?text)
+  }
+  graph ?review_np_pubinfo {
+    ?review_np dct:creator ?__reviewer_iri .
+    bind(?__reviewer_iri as ?reviewer)
+  }
+  optional { ?__reviewer_iri foaf:name ?reviewerLabel . }
+  filter( ?reviewerLabel != "Cristina-Iulia Bucu"^^xsd:string )
+  graph npa:graph {
+    ?review_np npa:hasValidSignatureForPublicKey ?reviewer_pubkey .
+  }
+
+  filter not exists {
+    graph npa:graph { ?newversion npa:hasValidSignatureForPublicKey ?reviewer_pubkey . } ?newversion np:hasPublicationInfo ?ri .  # TODO: move into npa:graph
+    graph ?ri { ?newversion npx:supersedes ?review_np . }
+  }
+  filter not exists {
+    graph npa:graph { ?retraction npa:hasValidSignatureForPublicKey ?reviewer_pubkey . } ?retraction np:hasAssertion ?ra .  # TODO: move into npa:graph
+    graph ?ra { ?somebody npx:retracts ?review_np . }
+  }
+
+  optional {
+    graph npa:graph { ?update_np npa:hasValidSignatureForPublicKey ?pubkey . } ?update_np np:hasPublicationInfo ?xi .  # TODO: move into npa:graph
+    graph ?xi { ?update_np lf:isUpdateOf ?submitted_np . }
+    bind(replace(str(?update_np), '^.*(RA[a-zA-Z0-9-_]{8})[a-zA-Z0-9-_]{35}$', '$1') as ?update_npLabel)
+  }
+
+  optional {
+    graph npa:graph { ?response_np npa:hasValidSignatureForPublicKey ?pubkey . } ?response_np np:hasAssertion ?respa .
+    graph ?respa { ?response_comment lf:isResponseTo ?review_np . }
+    bind(replace(str(?response_np), '^.*(RA[a-zA-Z0-9-_]{8})[a-zA-Z0-9-_]{35}$', '$1') as ?response_npLabel)
+    filter not exists {
+      graph npa:graph { ?retraction npa:hasValidSignatureForPublicKey ?pubkey . } ?retraction np:hasAssertion ?respra .  # TODO: move into npa:graph
+      graph ?respra { ?somebody npx:retracts ?response_np . }
+    }
+  }
+
+  bind(if(bound(?update_np), if(bound(?response_np), "", uri(concat(respond:, ?review_np, "&param_ReferredObject=", ?update_np))), concat(coalesce(?authorLabel, "the author"), ' can respond here once update is published')) as ?add_response)
+  bind(if(bound(?update_np), if(bound(?response_np), "", concat(coalesce(?authorLabel, "the author"), ' can click here to respond')), "") as ?add_responseLabel)
+
+} order by ?submitted_np ?review_np
