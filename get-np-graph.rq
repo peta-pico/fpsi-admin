@@ -12,6 +12,8 @@ select distinct ?node1 ?rel ?node2 where {
 
 {
 
+  # SUPERPATTERN
+
   graph ?submission_np_head {
     ?submission_np np:hasAssertion ?submission_np_assertion ;
       np:hasPublicationInfo ?submission_np_pubinfo ;
@@ -35,35 +37,13 @@ select distinct ?node1 ?rel ?node2 where {
     graph ?sa { ?somebody_s npx:retracts ?submission_np . }
   }
 
-  graph ?review_np_head {
-    ?review_np np:hasAssertion ?review_np_assertion ;
-      np:hasPublicationInfo ?review_np_pubinfo ;
-      a np:Nanopublication .
-    bind(replace(str(?review_np), '^.*(RA[a-zA-Z0-9-_]{8})[a-zA-Z0-9-_]{35}$', '$1') as ?review_npLabel)
-  }
-  graph ?review_np_assertion {
-    ?r a lf:ReviewComment .
-    ?r lf:refersTo ?submitted_np .
-  }
-  graph ?review_np_pubinfo {
-    ?review_np dct:creator ?reviewer_iri .
-    bind(?reviewer_iri as ?reviewer)
-  }
-
-  filter not exists {
-    graph npa:graph { ?newversion npa:hasValidSignatureForPublicKey ?reviewer_pubkey . } ?newversion np:hasPublicationInfo ?ri .  # TODO: move into npa:graph
-    graph ?ri { ?newversion npx:supersedes ?review_np . }
-  }
-  filter not exists {
-    graph npa:graph { ?retraction_rv npa:hasValidSignatureForPublicKey ?reviewer_pubkey . } ?retraction_rv np:hasAssertion ?ra .  # TODO: move into npa:graph
-    graph ?ra { ?somebody_rv npx:retracts ?review_np . }
-  }
-
-  bind("->" as ?rel)
-  bind(?review_npLabel as ?node1)
-  bind(?submitted_npLabel as ?node2)
+  bind(?submitted_npLabel as ?node1)
+  bind("[fillcolor=red]" as ?rel)
+  bind("" as ?node2)
   
 } union {
+
+  # REVIEWS
 
   graph ?submission_np_head {
     ?submission_np np:hasAssertion ?submission_np_assertion ;
@@ -115,8 +95,10 @@ select distinct ?node1 ?rel ?node2 where {
   bind(?review_npLabel as ?node1)
   bind("[fillcolor=blue]" as ?rel)
   bind("" as ?node2)
-  
+
 } union {
+
+  # REVIEW -> SUPERPATTERN
 
   graph ?submission_np_head {
     ?submission_np np:hasAssertion ?submission_np_assertion ;
@@ -141,9 +123,95 @@ select distinct ?node1 ?rel ?node2 where {
     graph ?sa { ?somebody_s npx:retracts ?submission_np . }
   }
 
+  graph ?review_np_head {
+    ?review_np np:hasAssertion ?review_np_assertion ;
+      np:hasPublicationInfo ?review_np_pubinfo ;
+      a np:Nanopublication .
+    bind(replace(str(?review_np), '^.*(RA[a-zA-Z0-9-_]{8})[a-zA-Z0-9-_]{35}$', '$1') as ?review_npLabel)
+  }
+  graph ?review_np_assertion {
+    ?r a lf:ReviewComment .
+    ?r lf:refersTo ?submitted_np .
+  }
+  graph ?review_np_pubinfo {
+    ?review_np dct:creator ?reviewer_iri .
+    bind(?reviewer_iri as ?reviewer)
+  }
+
+  filter not exists {
+    graph npa:graph { ?newversion npa:hasValidSignatureForPublicKey ?reviewer_pubkey . } ?newversion np:hasPublicationInfo ?ri .  # TODO: move into npa:graph
+    graph ?ri { ?newversion npx:supersedes ?review_np . }
+  }
+  filter not exists {
+    graph npa:graph { ?retraction_rv npa:hasValidSignatureForPublicKey ?reviewer_pubkey . } ?retraction_rv np:hasAssertion ?ra .  # TODO: move into npa:graph
+    graph ?ra { ?somebody_rv npx:retracts ?review_np . }
+  }
+
+  bind(?review_npLabel as ?node1)
+  bind("->" as ?rel)
+  bind(?submitted_npLabel as ?node2)
+
+} union {
+
+  # SUPERPATTERN -> CLASSDEF
+
+  graph ?submission_np_head {
+    ?submission_np np:hasAssertion ?submission_np_assertion ;
+      np:hasPublicationInfo ?submission_np_pubinfo .
+  }
+  graph ?submission_np_assertion {
+    ?submitted_np frbr:partOf <https://w3id.org/linkflows/formalization-papers/DataScienceSpecialIssue> .
+  }
+  graph ?submission_np_pubinfo {
+    ?submission_np dct:creator ?__author_iri .
+    bind(?__author_iri as ?author)
+  }
+  optional { ?__author_iri foaf:name ?authorLabel . }
+  filter( ?authorLabel != "Cristina-Iulia Bucu"^^xsd:string )
+  graph npa:graph {
+    ?submission_np vp: ?pubkey .
+  }
+
+  filter not exists {
+    graph npa:graph { ?retraction vp: ?pubkey . } ?retraction np:hasAssertion ?sa .  # TODO: move into npa:graph
+    graph ?sa { ?somebody npx:retracts ?submission_np . }
+  }
+
+  graph ?submitted_np_head {
+    ?submitted_np np:hasAssertion ?submitted_np_assertion .
+  }
+  graph ?submitted_np_assertion {
+    ?submitted_np_s ?submitted_np_p ?class .
+  }
+
+  graph ?sp_np_head {
+    ?sp_np np:hasAssertion ?sp_np_assertion .
+  }
+  graph ?sp_np_assertion {
+    ?spi ?p ?class .
+  }
+  graph npa:graph {
+    ?sp_np vp: ?pubkey .
+  }
+
+  graph ?class_np_head {
+    ?class_np np:hasAssertion ?class_np_assertion ;
+      np:hasPublicationInfo ?class_np_pubinfo .
+    bind(replace(str(?class_np), '^.*(RA[a-zA-Z0-9-_]{8})[a-zA-Z0-9-_]{35}$', '$1') as ?class_npLabel)
+  }
+  graph ?class_np_assertion {
+    ?class rdfs:label ?class_name .
+  }
+  graph ?class_np_pubinfo {
+    ?class_np npx:introduces ?class .
+  }
+  graph npa:graph {
+    ?class_np vp: ?pubkey .
+  }
+
   bind(?submitted_npLabel as ?node1)
-  bind("[fillcolor=red]" as ?rel)
-  bind("" as ?node2)
+  bind("->" as ?rel)
+  bind(?class_npLabel as ?node2)
 
 }
 

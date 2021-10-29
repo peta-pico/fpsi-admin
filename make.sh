@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-wget -O np-graph.csv http://grlc.io/api-git/peta-pico/fpsi-admin/get-np-graph.csv
+wget -O sparql-results/superpatterns.csv http://grlc.io/api-git/peta-pico/fpsi-admin/get-superpatterns.csv
+wget -O sparql-results/reviews.csv http://grlc.io/api-git/peta-pico/fpsi-admin/get-reviews.csv
+
+cat sparql-results/*.csv > np-graph.csv
 
 cat np-graph.head.dot > np-graph.dot
 
