@@ -22,6 +22,10 @@ select distinct ?node1 ?rel ?node2 where {
     bind(?__author_iri as ?author)
   }
   filter not exists {
+    graph npa:graph { ?newversion npa:hasValidSignatureForPublicKey ?pubkey . } ?newversion np:hasPublicationInfo ?si .  # TODO: move into npa:graph
+    graph ?si { ?newversion npx:supersedes ?submission_np . }
+  }
+  filter not exists {
     graph npa:graph { ?retraction npa:hasValidSignatureForPublicKey ?pubkey . } ?retraction np:hasAssertion ?sra .  # TODO: move into npa:graph
     graph ?sra { ?somebody npx:retracts ?submission_np . }
   }
