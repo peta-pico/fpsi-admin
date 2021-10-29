@@ -45,8 +45,8 @@ select distinct ?node1 ?rel ?node2 where {
     ?r lf:refersTo ?submitted_np .
   }
   graph ?review_np_pubinfo {
-    ?review_np dct:creator ?__reviewer_iri .
-    bind(?__reviewer_iri as ?reviewer)
+    ?review_np dct:creator ?reviewer_iri .
+    bind(?reviewer_iri as ?reviewer)
   }
 
   filter not exists {
