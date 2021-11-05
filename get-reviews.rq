@@ -58,7 +58,7 @@ select distinct ?node1 ?rel ?node2 where {
   }
 
   bind(?review_npLabel as ?node1)
-  bind(concat("[fillcolor=blue,URL=", ?review_np, "]") as ?rel)
+  bind(concat("[fillcolor=blue,URL=\"", ?review_np, "\"]") as ?rel)
   bind("" as ?node2)
 
 }
