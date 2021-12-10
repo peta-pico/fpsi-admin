@@ -18,7 +18,8 @@ select distinct ?node1 ?rel ?node2 where {
       a np:Nanopublication .
   }
   graph ?submission_np_assertion {
-    ?submitted_np frbr:partOf <https://w3id.org/linkflows/formalization-papers/DataScienceSpecialIssue> .
+    ?submitted_np frbr:partOf <https://w3id.org/linkflows/formalization-papers/DataScienceSpecialIssue> ;
+      pso:withStatus pso:submitted .
     bind(replace(str(?submitted_np), '^.*(RA[a-zA-Z0-9-_]{8})[a-zA-Z0-9-_]{35}$', '$1') as ?submitted_npLabel)
   }
   graph ?submission_np_pubinfo {
