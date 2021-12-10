@@ -2,6 +2,8 @@
 
 wget -O sparql-results/superpatterns.csv http://grlc.io/api-git/peta-pico/fpsi-admin/get-superpatterns.csv
 wget -O sparql-results/reviews.csv http://grlc.io/api-git/peta-pico/fpsi-admin/get-reviews.csv
+wget -O sparql-results/classdefs.csv http://grlc.io/api-git/peta-pico/fpsi-admin/get-classdefs.csv
+
 wget -O sparql-results/review-to-superpattern.csv http://grlc.io/api-git/peta-pico/fpsi-admin/get-review-to-superpattern.csv
 wget -O sparql-results/superpattern-to-classdef.csv http://grlc.io/api-git/peta-pico/fpsi-admin/get-superpattern-to-classdef.csv
 
@@ -14,7 +16,6 @@ done
 cat np-graph.head.dot > np-graph.dot
 
 cat np-graph.csv \
-  | sed '1d' \
   | sed -r 's/","(.*)","/" \1 "/g' \
   | sed 's/""/"/g' \
   | sed 's/ "$//g' \
