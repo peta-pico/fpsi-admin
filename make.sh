@@ -3,9 +3,11 @@
 wget -O sparql-results/superpatterns.csv http://grlc.io/api-git/peta-pico/fpsi-admin/get-superpatterns.csv
 wget -O sparql-results/reviews.csv http://grlc.io/api-git/peta-pico/fpsi-admin/get-reviews.csv
 wget -O sparql-results/classdefs.csv http://grlc.io/api-git/peta-pico/fpsi-admin/get-classdefs.csv
+wget -O sparql-results/updates.csv http://grlc.io/api-git/peta-pico/fpsi-admin/get-updates.csv
 
 wget -O sparql-results/review-to-superpattern.csv http://grlc.io/api-git/peta-pico/fpsi-admin/get-review-to-superpattern.csv
 wget -O sparql-results/superpattern-to-classdef.csv http://grlc.io/api-git/peta-pico/fpsi-admin/get-superpattern-to-classdef.csv
+wget -O sparql-results/update-to-superpattern.csv http://grlc.io/api-git/peta-pico/fpsi-admin/get-update-to-superpattern.csv
 
 rm np-graph.csv
 
