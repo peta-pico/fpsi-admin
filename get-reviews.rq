@@ -27,8 +27,8 @@ select distinct ?node1 ?rel ?node2 where {
   }
 
   filter not exists {
-    graph npa:graph { ?newversion npa:hasValidSignatureForPublicKey ?pubkey . } ?newversion np:hasPublicationInfo ?si .  # TODO: move into npa:graph
-    graph ?si { ?newversion npx:supersedes ?submission_np . }
+    graph npa:graph { ?newversion_s npa:hasValidSignatureForPublicKey ?pubkey . } ?newversion_s np:hasPublicationInfo ?si .  # TODO: move into npa:graph
+    graph ?si { ?newversion_s npx:supersedes ?submission_np . }
   }
   filter not exists {
     graph npa:graph { ?retraction_s npa:hasValidSignatureForPublicKey ?pubkey . } ?retraction_s np:hasAssertion ?sa .  # TODO: move into npa:graph
@@ -51,8 +51,8 @@ select distinct ?node1 ?rel ?node2 where {
   }
 
   filter not exists {
-    graph npa:graph { ?newversion npa:hasValidSignatureForPublicKey ?reviewer_pubkey . } ?newversion np:hasPublicationInfo ?ri .  # TODO: move into npa:graph
-    graph ?ri { ?newversion npx:supersedes ?review_np . }
+    graph npa:graph { ?newversion_rv npa:hasValidSignatureForPublicKey ?reviewer_pubkey . } ?newversion_rv np:hasPublicationInfo ?ri .  # TODO: move into npa:graph
+    graph ?ri { ?newversion_rv npx:supersedes ?review_np . }
   }
   filter not exists {
     graph npa:graph { ?retraction_rv npa:hasValidSignatureForPublicKey ?reviewer_pubkey . } ?retraction_rv np:hasAssertion ?ra .  # TODO: move into npa:graph
