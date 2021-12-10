@@ -36,7 +36,7 @@ select distinct ?node1 ?rel ?node2 where {
   }
 
   bind(?submitted_npLabel as ?node1)
-  bind("[fillcolor=red]" as ?rel)
+  bind(concat("[fillcolor=blue,URL=\"", ?submitted_np, "\"]") as ?rel)
   bind("" as ?node2)
 
 }
